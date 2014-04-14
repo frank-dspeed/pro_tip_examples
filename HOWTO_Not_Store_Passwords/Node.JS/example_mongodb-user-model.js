@@ -44,3 +44,43 @@ userSchema.methods.isValidPassword = function(passwordString) {
  
 mongoose.model('User', userSchema);
 module.exports = mongoose.model('User');
+
+
+
+    var mongoose = require('mongoose'),
+    crypto = require('crypto'),
+    uuid = require('node-uuid'),
+    Schema = mongoose.Schema,
+    ObjectId = Schema.ObjectId;
+    var userSchema = new Schema({
+    name: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
+    salt: { type: String, required: true, default: uuid.v1 },
+    passwdHash: { type: String, required: true }
+    });
+    var hash = function(passwd, salt) {
+    return crypto.createHmac('sha256', salt).update(passwd).digest('hex');
+    };
+    userSchema.methods.setPassword = function(passwordString) {
+    this.passwdHash = hash(passwordString, this.salt);
+    };
+    userSchema.methods.isValidPassword = function(passwordString) {
+    return this.passwdHash === hash(passwordString, this.salt);
+    };
+    mongoose.model('User', userSchema);
+    module.exports = mongoose.model('User');
+
+The Dot Matches (Almost) Any Character
+
+In regular expressions, the dot or period is one of the most commonly used metacharacters. Unfortunately, it is also the most commonly misused metacharacter.
+
+so plz read this 
+[example usage of dot match all][1]
+
+[good free online regex builder][2]
+[good one too][3]
+
+
+  [1]: http://www.regular-expressions.info/dot.html
+  [2]: https://www.debuggex.com/
+  [3]: http://refiddle.com/
