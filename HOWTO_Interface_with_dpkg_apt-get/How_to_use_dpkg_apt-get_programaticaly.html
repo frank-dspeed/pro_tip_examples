@@ -1,0 +1,70 @@
+dpkg command cheat sheet for Debian/Ubuntu Linux
+
+
+
+dpkg is package manager for Debian Linux which is use to install/manage individual packages. 
+Realy often People mess with it they simply delet package parts and then this manager don't works any more then you need to fix that or manual remove the package
+
+Here is quick cheat sheet you will find handy while using dpkg at shell prompt:
+Syntax 	Description 	Example
+dpkg -i {.deb package} 	Install the package 	dpkg -i zip_2.31-3_i386.deb
+dpkg -i {.deb package} 	Upgrade package if it is installed else install a fresh copy of package 	dpkg -i zip_2.31-3_i386.deb
+dpkg -R {Directory-name} 	Install all packages recursively from directory 	dpkg -R /tmp/downloads
+dpkg -r {package} 	Remove/Delete an installed package except configuration files 	dpkg -r zip
+dpkg -P {package} 	Remove/Delete everything including configuration files 	dpkg -P apache-perl
+dpkg -l 	List all installed packages, along with package version and short description 	dpkg -l
+dokg -l | less
+dpkg -l '*apache*'
+dpkg -l | grep -i 'sudo'
+dpkg -l {package} 	List individual installed packages, along with package version and short description 	dpkg -l apache-perl
+dpkg -L {package} 	Find out files are provided by the installed package i.e. list where files were installed 	dpkg -L apache-perl
+dpkg -L perl
+dpkg -c {.Deb package} 	List files provided (or owned) by the package i.e. List all files inside debian .deb package file, very useful to find where files would be installed 	dpkg -c dc_1.06-19_i386.deb
+dpkg -S {/path/to/file} 	Find what package owns the file i.e. find out what package does file belong 	dpkg -S /bin/netstat
+dpkg -S /sbin/ippool
+dpkg -p {package} 	Display details about package package group, version, maintainer, Architecture, display depends packages, description etc 	dpkg -p lsof
+dpkg -s {package} | grep Status 	Find out if Debian package is installed or not (status) 	dpkg -s lsof | grep Status
+
+{package} - Replace with actual package name 
+
+
+Some other Real Live Examples
+
+Test if package exists with the apt-cache
+is_installed=0
+test_installed=( `apt-cache policy package-name | grep "Installed:" ` )
+[ ! "${test_installed[1]}" == "(none)" ] && is_installed=1
+
+Test if package exists with the good old query :D
+dpkg-query -Wf'${db:Status-abbrev}' package-name 2>/dev/null | grep -q '^i'
+
+Will return true (exit status 0 in shell script) if the package is installed, false (exit status 1) otherwise.
+
+    -W means "Show" (dpkg-query must have a requested action).
+    -f changes the format of the output.
+    db:Status-abbrev is the short form of the package status.
+    2>/dev/null silences dpkg-query if an invalid package name is given. How this should be handled could be a case-to-case issue.
+    grep -q returns true if there is a match, false otherwise.
+
+If it is used often, it could be made a simple function:
+
+#!/bin/sh
+debInst()
+{
+    dpkg-query -Wf'${db:Status-abbrev}' "${1}" 2>/dev/null | grep -q '^i'
+}
+
+if debInst "${1}"; then
+    printf 'Why yes, the package %s _is_ installed!\n' "${1}"
+else
+    printf 'I regret to inform you that the package %s is not currently installed.\n' "${1}"
+fi
+
+or just simply
+
+#!/bin/sh
+if dpkg-query -Wf'${db:Status-abbrev}' "${1}" 2>/dev/null | grep -q '^i'; then
+    printf 'Why yes, the package "%s" _is_ installed!\n' "${1}"
+else
+    printf 'I regret to inform you that the package "%s" is not currently installed.\n' "${1}"
+fi
