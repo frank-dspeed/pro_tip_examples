@@ -1,0 +1,3 @@
+[submodule "HOWTO_Not_Store_Passwords/PHP"]
+	path = HOWTO_Not_Store_Passwords/PHP
+	url = https://github.com/ircmaxell/password_compat
